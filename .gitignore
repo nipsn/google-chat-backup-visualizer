@@ -1,0 +1,4 @@
+resources/*
+.idea/*
+.venv
+*.ipynb
