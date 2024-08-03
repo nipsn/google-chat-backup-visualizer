@@ -2,3 +2,4 @@ resources/*
 .idea/*
 .venv
 *.ipynb
+__pycache__/
