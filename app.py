@@ -15,17 +15,20 @@ def assign_colors(members):
     return member_colors
 
 
-def replace_image_references_in_string(input_string):
-    search_term = "File-image.png"
+def replace_image_references_in_string(input_string, search_term):
+    # TODO: incorrect filename handling
     count = 0
     start = 0
+    search_term_split = search_term.split(".")
+    filename = search_term_split[0]
+    extension = search_term_split[1]
 
     while True:
         start = input_string.find(search_term, start)
         if start == -1:
             break
         if count > 0:
-            replacement = f"File-image({count}).png"
+            replacement = filename + f"({count})." + extension
             input_string = input_string[:start] + replacement + \
                 input_string[start + len(search_term):]
             start += len(replacement)  # Move past the replacement
@@ -44,7 +47,9 @@ def load_json_data(group_info_path, messages_path):
     with open(messages_path, 'r', encoding='utf-8') as f:
         messages = json.load(f)
         messages_string = json.dumps(messages)
-        messages_string = replace_image_references_in_string(messages_string)
+        messages_string = replace_image_references_in_string(messages_string, "File-image.png")
+        messages_string = replace_image_references_in_string(messages_string, "File-imagen.png")
+        messages_string = replace_image_references_in_string(messages_string, "File-unnamed.png")
         messages = json.loads(messages_string)
 
     return group_info, messages, member_colors
