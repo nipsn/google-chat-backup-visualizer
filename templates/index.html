@@ -5,83 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Group Info and Messages</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .group-emoji {
-            font-size: 3em;
-            margin-right: 20px;
-        }
-        .group-emoji:hover {
-            animation: bounce 2s infinite;
-        }
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {
-                transform: translateY(0);
-            }
-            40% {
-                transform: translateY(-20px);
-            }
-            60% {
-                transform: translateY(-10px);
-            }
-        }
-        .message {
-            border-left: 5px solid;
-            padding-left: 10px;
-            margin-bottom: 20px;
-        }
-        .message strong {
-            color: #4CAF50;
-        }
-        .message em {
-            color: #666;
-            font-size: 0.9em;
-        }
-        .annotation-box img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 5px;
-        }
-        .header {
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-            color: white;
-            text-align: center;
-            padding: 2rem 0;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .header .container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .header .group-emoji {
-            font-size: 4rem;
-        }
-        .header h1 {
-            font-family: 'Roboto', sans-serif;
-            font-weight: bold;
-            margin: 0;
-            margin-left: 1rem;
-        }
-    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <link href="static/styles.css" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body>
     <header class="header">
-        <div class="container">
-            <span class="group-emoji">{{ group_info.emoji_id }}</span>
+        <div style="display: flex; align-items: center;">
+            <span class="group-emoji" aria-label="Group Emoji">{{ group_info.emoji_id }}</span>
             <h1>{{ group_info.name }}</h1>
         </div>
+        <div>
+            <button id="toggleDarkMode" class="toggle-dark-mode-btn" aria-label="Toggle Dark Mode">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button id="toggleSearch" class="toggle-search-btn" aria-label="Toggle Search">
+                <i class="fas fa-search"></i>
+            </button>
+            <button id="toggleSidebar" class="toggle-sidebar-btn" aria-label="Toggle Sidebar">
+                <i class="fas fa-users"></i>
+            </button>
+        </div>
     </header>
-    <div class="container">
-        <h2 class="text-secondary">Members</h2>
-        <ul class="list-group mb-4">
+    <div class="sidebar" aria-label="Sidebar">
+        <button id="hideSidebar" class="hide-sidebar-btn" aria-label="Hide Sidebar">
+            <i class="fas fa-arrow-right"></i>
+        </button>
+        <h2 class="text-secondary mb-4 text-center">Members</h2>
+        <ul class="list-group">
             {% for member in group_info.members %}
                 <li class="list-group-item" style="color: {{ member_colors[member.name] }}">{{ member.name }} ({{ member.email }})</li>
             {% endfor %}
         </ul>
-
-        <h2 class="text-secondary">Messages</h2>
-        <ul class="list-group">
+        <h2 class="text-secondary mb-4 text-center">Pinned Messages</h2>
+        <ul class="list-group" id="pinnedMessagesList">
+            {% for pinned in pinned_messages %}
+                <li class="list-group-item">
+                    <strong>{{ pinned.creator.name }}:</strong> {{ pinned.text }}
+                    <br><em>{{ pinned.created_date }}</em>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="main-content">
+        <div class="search-bar">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search messages...">
+        </div>
+        <h2 class="text-secondary mb-4">Group Messages</h2>
+        <ul class="list-group" id="messageList">
             {% for message in messages.messages %}
                 <li class="list-group-item message" style="border-color: {{ member_colors[message.creator.name] }};">
                     <strong class="member" style="color: {{ member_colors[message.creator.name] }}">{{ message.creator.name }}:</strong> 
@@ -134,12 +104,19 @@
                             {% endfor %}
                         </div>
                     {% endif %}
+                    <button class="pin-message-btn" aria-label="Pin Message">
+                        <i class="fas fa-thumbtack"></i>
+                    </button>
                 </li>
             {% endfor %}
         </ul>
     </div>
+    <button id="scrollToBottom" class="scroll-to-bottom-btn" aria-label="Scroll to Bottom">
+        <i class="fas fa-arrow-down"></i>
+    </button>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="static/scripts.js"></script>
 </body>
 </html>

@@ -77,9 +77,8 @@ def replace_emoji(text, annotations):
     url_pattern = re.compile(r'(https?://\S+)')
     text = url_pattern.sub(r'<a href="\1">\1</a>', text)
 
-    # Replace inline code blocks
     code_pattern = re.compile(r'```(\w+)?\s*([^`]+)```', re.DOTALL)
-    text = code_pattern.sub(r'<pre><code class="\1">\2</code></pre>', text)
+    text = code_pattern.sub(r'<pre><code class="\\1">\\2</code></pre>', text)
 
     # Replace user mentions with colored text
     mention_pattern = re.compile(
