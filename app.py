@@ -75,12 +75,12 @@ def replace_emoji(text, annotations):
     url_pattern = re.compile(r'(https?://\S+)')
     text = url_pattern.sub(r'<a href="\1">\1</a>', text)
 
-    code_pattern = re.compile(r'```(\w+)?\s*([^`]+)```', re.DOTALL)
-    text = code_pattern.sub(r'<pre><code class="\\1">\\2</code></pre>', text)
+    code_pattern = re.compile(r'```([^`]+)```', re.DOTALL)
+    text = code_pattern.sub(r'<pre><code>\1</code></pre>', text)
 
     # Replace user mentions with colored text
     mention_pattern = re.compile(
-        r'@((?:[\w\áéíóúÁÉÍÓÚñÑ]+\s+){0,2}[\w\áéíóúÁÉÍÓÚñÑ]+)')
+        r'@((?:[\wáéíóúÁÉÍÓÚñÑ]+\s+){0,2}[\wáéíóúÁÉÍÓÚñÑ]+)')
 
     def replace_match(match):
         full_mention = match.group(1)

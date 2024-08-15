@@ -61,7 +61,7 @@
                             {% if annotation.url_metadata and annotation.url_metadata.title %}
                                 <a href="{{ annotation.url_metadata.url.private_do_not_access_or_else_safe_url_wrapped_value }}" class="annotation-box d-block mt-2">
                                     <img src="{{ annotation.url_metadata.image_url }}" alt="Image" class="img-fluid">
-                                    <h3 class="h5 mt-2">{{ annotation.url_metadata.title }}</h3>
+                                    <p class="mt-2">{{ annotation.url_metadata.title }}</p>
                                     <p>{{ annotation.url_metadata.snippet }}</p>
                                 </a>
                             {% elif annotation.url_metadata and annotation.url_metadata.image_url %}
