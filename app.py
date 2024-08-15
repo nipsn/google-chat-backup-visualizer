@@ -38,6 +38,14 @@ def replace_image_references(msg_list, search_term):
                 count += 1
     return msg_list
 
+def replace_html_special_chars(text):
+    text = text.replace("<", "&lt;")
+    text = text.replace("\u003c", "&lt;")
+    text = text.replace(">", "&gt;")
+    text = text.replace("\u003e", "&gt;")
+    text = text.replace("&", "&amp;")
+    return text.replace("\u0026", "&amp;")
+
 
 def load_json_data(group_info_path, messages_path):
     with open(group_info_path, 'r', encoding='utf-8') as f:
@@ -59,6 +67,12 @@ def load_json_data(group_info_path, messages_path):
 
 @app.template_filter('replace_emoji')
 def replace_emoji(text, annotations):
+
+    if not isinstance(text, str):
+        text = str(text)
+
+    text = replace_html_special_chars(text)
+
     for annotation in annotations:
         if 'custom_emoji_metadata' in annotation:
             shortcode = annotation['custom_emoji_metadata']['custom_emoji']['shortcode']
@@ -67,10 +81,6 @@ def replace_emoji(text, annotations):
                 'media', filename=f"CustomEmoji-{shortcode[1:-1]}.{content_type.split('/')[-1]}")
             text = text.replace(
                 '�', f'<img src="{emoji_url}" alt="{shortcode}" style="width: 30px; height: 30px;">', 1)
-
-    if not isinstance(text, str):
-        text = str(text)
-
     # Replace URLs with anchor tags
     url_pattern = re.compile(r'(https?://\S+)')
     text = url_pattern.sub(r'<a href="\1">\1</a>', text)
@@ -123,17 +133,12 @@ def before_request():
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        description='Run Flask app with JSON file paths.')
-    parser.add_argument('--group_path', required=True,
-                        help='Path to the group directory')
-    args = parser.parse_args()
 
     group_info, messages, member_colors = load_json_data(
-        args.group_path + "/group_info.json", args.group_path + "/messages.json")
+        "resources/group_info.json", "resources/messages.json")
 
     # Extract the last part of the group_path
-    page_name = os.path.basename(os.path.normpath(args.group_path))
+    page_name = os.path.basename(os.path.normpath("resources"))
 
     # Store the data in the Flask application config
     app.config['GROUP_PATH'] = "resources"
