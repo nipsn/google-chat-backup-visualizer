@@ -15,31 +15,28 @@ def assign_colors(members):
     for member in members:
         member_colors[member['name']] = colors[color_index % len(colors)]
         color_index += 1
-    print(member_colors)
     return member_colors
 
 
-def replace_image_references_in_string(search_term, input_string):
+def replace_image_references(msg_list, search_term):
     count = 0
-    start = 0
-
-    replace = search_term.split(".")[0]
-    type = search_term.split(".")[1]
-
-    while True:
-        start = input_string.find(search_term, start)
-        if start == -1:
-            break
-        if count > 0:
-            replacement = f"{replace}({count}).{type}"
-            input_string = input_string[:start] + replacement + \
-                input_string[start + len(search_term):]
-            start += len(replacement)  # Move past the replacement
-        else:
-            start += len(search_term)  # Move past the search term
-        count += 1
-
-    return input_string
+    for msg in msg_list:
+        try:
+            has_attached_files = msg["attached_files"]
+        except KeyError:
+            has_attached_files = False
+        if has_attached_files:
+            # not common to have more than 1 attachment
+            try:
+                export_file_name = msg["attached_files"][0]["export_name"]
+            except KeyError:
+                export_file_name = ""
+            if export_file_name == search_term:
+                if count > 0:
+                    (file_name, extension) = search_term.split(".")
+                    msg["attached_files"][0]["export_name"] = f"{file_name}({count}).{extension}"
+                count += 1
+    return msg_list
 
 
 def load_json_data(group_info_path, messages_path):
@@ -48,16 +45,17 @@ def load_json_data(group_info_path, messages_path):
         member_colors = assign_colors(group_info['members'])
 
     with open(messages_path, 'r', encoding='utf-8') as f:
-        messages = json.load(f)
-        messages_string = json.dumps(messages)
-        messages_string = replace_image_references_in_string(
-            "File-image.png", messages_string)
-        messages_string = replace_image_references_in_string(
-            "File-imagen.png", messages_string)
-        messages = json.loads(messages_string)
+        msg_list = json.load(f)["messages"]
+
+        msg_list = replace_image_references(msg_list, "File-image.png")
+        msg_list = replace_image_references(msg_list, "File-imagen.png")
+        msg_list = replace_image_references(msg_list, "File-unnamed.png")
+        messages = {"messages": msg_list}
 
     return group_info, messages, member_colors
 
+
+# Route to serve media files
 
 @app.template_filter('replace_emoji')
 def replace_emoji(text, annotations):
@@ -101,6 +99,7 @@ def replace_emoji(text, annotations):
 def media(filename):
     return send_from_directory(g.group_path, filename)
 
+# Route to display group info and messages
 
 @app.route('/<page_name>')
 def index(page_name):
@@ -137,7 +136,7 @@ if __name__ == '__main__':
     page_name = os.path.basename(os.path.normpath(args.group_path))
 
     # Store the data in the Flask application config
-    app.config['GROUP_PATH'] = args.group_path
+    app.config['GROUP_PATH'] = "resources"
     app.config['GROUP_INFO'] = group_info
     app.config['MESSAGES'] = messages
     app.config['MEMBER_COLORS'] = member_colors
