@@ -3,6 +3,8 @@ from markupsafe import Markup
 import json
 import os
 import re
+import datetime
+import locale
 
 app = Flask(__name__)
 
@@ -136,19 +138,27 @@ def index(group_name):
 @app.route('/')
 def home():
     groups = []
-    base_path = "resources"
+    base_path = 'resources'
     for group_name in os.listdir(base_path):
         group_path = os.path.join(base_path, group_name)
         if os.path.isdir(group_path):
             group_info_path = os.path.join(group_path, 'group_info.json')
+            group_msg_path = os.path.join(group_path, 'messages.json')
+            if os.path.exists(group_msg_path):
+                with open(group_msg_path, 'r', encoding='utf-8') as f:
+                    last_msg_date_str = json.load(f)['messages'][-1]['created_date']
+                    locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+                    last_msg_datetime = datetime.datetime.strptime(last_msg_date_str, "%A, %d de %B de %Y, %H:%M:%S %Z")
             if os.path.exists(group_info_path):
                 with open(group_info_path, 'r', encoding='utf-8') as f:
                     group_info = json.load(f)
                     groups.append({
-                        "name": group_info['name'],
-                        "emoji_id": group_info.get('emoji_id', '📁'),
-                        "group_name": group_name
+                        'name': group_info['name'],
+                        'emoji_id': group_info.get('emoji_id', '📁'),
+                        'group_name': group_name,
+                        'last_msg_datetime': last_msg_datetime
                     })
+    groups.sort(key=lambda x: x['last_msg_datetime'], reverse=True)
     return render_template('home.html', groups=groups)
 
 
