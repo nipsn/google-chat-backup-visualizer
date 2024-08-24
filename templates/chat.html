@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ group_info.name }}</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div style="display: flex; align-items: center;">
+            <span class="group-emoji" aria-label="Group Emoji">{{ group_info.emoji_id }}</span>
+            <h1>{{ group_info.name }}</h1>
+        </div>
+        <div>
+            <a href="{{ url_for('home') }}" class="btn btn-primary">Back to Home</a>
+            <button id="toggleDarkMode" class="toggle-dark-mode-btn" aria-label="Toggle Dark Mode">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button id="toggleSearch" class="toggle-search-btn" aria-label="Toggle Search">
+                <i class="fas fa-search"></i>
+            </button>
+            <button id="toggleSidebar" class="toggle-sidebar-btn" aria-label="Toggle Sidebar">
+                <i class="fas fa-users"></i>
+            </button>
+        </div>
+    </header>
+    <div class="sidebar" aria-label="Sidebar">
+        <button id="hideSidebar" class="hide-sidebar-btn" aria-label="Hide Sidebar">
+            <i class="fas fa-arrow-right"></i>
+        </button>
+        <h2 class="text-secondary mb-4 text-center">Members</h2>
+        <ul class="list-group">
+            {% for member in group_info.members %}
+                <li class="list-group-item" style="color: {{ member_colors[member.name] }}">{{ member.name }} ({{ member.email }})</li>
+            {% endfor %}
+        </ul>
+        <h2 class="text-secondary mb-4 text-center">Pinned Messages</h2>
+        <ul class="list-group" id="pinnedMessagesList">
+            {% for pinned in pinned_messages %}
+                <li class="list-group-item">
+                    <strong>{{ pinned.creator.name }}:</strong> {{ pinned.text }}
+                    <br><em>{{ pinned.created_date }}</em>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="main-content">
+        <div class="search-bar">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search messages...">
+        </div>
+        <h2 class="text-secondary mb-4">Group Messages</h2>
+        <ul class="list-group" id="messageList">
+            {% for message in messages.messages %}
+                <li class="list-group-item message" style="border-color: {{ member_colors[message.creator.name] }};">
+                    <strong class="member" style="color: {{ member_colors[message.creator.name] }}">{{ message.creator.name }}:</strong> 
+                    {% if message.annotations %}
+                        {{ message.text|replace_emoji(message.annotations) }}
+                        {% for annotation in message.annotations %}
+                            {% if annotation.url_metadata and annotation.url_metadata.title %}
+                                <a href="{{ annotation.url_metadata.url.private_do_not_access_or_else_safe_url_wrapped_value }}" class="annotation-box d-block mt-2">
+                                    <img src="{{ annotation.url_metadata.image_url }}" alt="Image" class="img-fluid">
+                                    <p class="mt-2">{{ annotation.url_metadata.title }}</p>
+                                    <p>{{ annotation.url_metadata.snippet }}</p>
+                                </a>
+                            {% elif annotation.url_metadata and annotation.url_metadata.image_url %}
+                                <br>
+                                <img src="{{ annotation.url_metadata.image_url }}" alt="GIF" class="img-fluid mt-2">
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        {{ message.text|replace_emoji([]) }}
+                    {% endif %}
+                    <br>
+                    <em>{{ message.created_date }}</em><br>
+                    {% if message.attached_files %}
+                        <div class="attachments mt-2">
+                            <strong>Attachments:</strong>
+                            <ul class="list-unstyled">
+                                {% for file in message.attached_files %}
+                                    <li>
+                                        {% if file.original_name.endswith('.jpg') or file.original_name.endswith('.jpeg') or file.original_name.endswith('.png') or file.original_name.endswith('.gif') %}
+                                            <img src="{{ url_for('media', group_name=group_name, filename=file.export_name) }}" alt="{{ file.original_name }}" class="img-fluid mt-2">
+                                        {% elif file.original_name.endswith('.mp3') or file.original_name.endswith('.wav') %}
+                                            <audio controls class="mt-2">
+                                                <source src="{{ url_for('media', group_name=group_name, filename=file.export_name) }}" type="audio/{{ file.original_name.split('.')[-1] }}">
+                                                Your browser does not support the audio element.
+                                            </audio>
+                                        {% else %}
+                                            <a href="{{ url_for('media', group_name=group_name, filename=file.export_name) }}" class="d-block mt-2">{{ file.original_name }}</a>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                    {% if message.reactions %}
+                        <div class="reactions mt-2 d-flex flex-wrap">
+                            {% for reaction in message.reactions %}
+                                {% if reaction.emoji.custom_emoji %}
+                                    <img src="{{ url_for('media', group_name=group_name, filename='CustomEmoji-' + reaction.emoji.custom_emoji.shortcode[1:-1] + '.' + reaction.emoji.custom_emoji.content_type.split('/')[-1]) }}" alt="{{ reaction.emoji.custom_emoji.shortcode }}" class="mr-2">
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <button class="pin-message-btn" aria-label="Pin Message">
+                        <i class="fas fa-thumbtack"></i>
+                    </button>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <button id="scrollToBottom" class="scroll-to-bottom-btn" aria-label="Scroll to Bottom">
+        <i class="fas fa-arrow-down"></i>
+    </button>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+</body>
+</html>

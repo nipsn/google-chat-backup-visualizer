@@ -128,7 +128,7 @@ def index(group_name):
     g.member_colors = member_colors
     g.group_name = group_name
 
-    return render_template('index.html',
+    return render_template('chat.html',
                            group_info=group_info,
                            messages=messages,
                            member_colors=member_colors,
@@ -161,7 +161,7 @@ def home():
                         'last_msg_date_str': last_msg_date_str,
                     })
     groups.sort(key=lambda x: x['last_msg_datetime'], reverse=True)
-    return render_template('home.html', groups=groups)
+    return render_template('index.html', groups=groups)
 
 
 if __name__ == '__main__':
