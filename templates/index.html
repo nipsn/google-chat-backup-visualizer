@@ -81,14 +81,14 @@
                                 {% for file in message.attached_files %}
                                     <li>
                                         {% if file.original_name.endswith('.jpg') or file.original_name.endswith('.jpeg') or file.original_name.endswith('.png') or file.original_name.endswith('.gif') %}
-                                            <img src="{{ url_for('media', group_name=group_info.name, filename=file.export_name) }}" alt="{{ file.original_name }}" class="img-fluid mt-2">
+                                            <img src="{{ url_for('media', group_name=group_name, filename=file.export_name) }}" alt="{{ file.original_name }}" class="img-fluid mt-2">
                                         {% elif file.original_name.endswith('.mp3') or file.original_name.endswith('.wav') %}
                                             <audio controls class="mt-2">
-                                                <source src="{{ url_for('media', group_name=group_info.name, filename=file.export_name) }}" type="audio/{{ file.original_name.split('.')[-1] }}">
+                                                <source src="{{ url_for('media', group_name=group_name, filename=file.export_name) }}" type="audio/{{ file.original_name.split('.')[-1] }}">
                                                 Your browser does not support the audio element.
                                             </audio>
                                         {% else %}
-                                            <a href="{{ url_for('media', group_name=group_info.name, filename=file.export_name) }}" class="d-block mt-2">{{ file.original_name }}</a>
+                                            <a href="{{ url_for('media', group_name=group_name, filename=file.export_name) }}" class="d-block mt-2">{{ file.original_name }}</a>
                                         {% endif %}
                                     </li>
                                 {% endfor %}
@@ -99,7 +99,7 @@
                         <div class="reactions mt-2 d-flex flex-wrap">
                             {% for reaction in message.reactions %}
                                 {% if reaction.emoji.custom_emoji %}
-                                    <img src="{{ url_for('media', group_name=group_info.name, filename='CustomEmoji-' + reaction.emoji.custom_emoji.shortcode[1:-1] + '.' + reaction.emoji.custom_emoji.content_type.split('/')[-1]) }}" alt="{{ reaction.emoji.custom_emoji.shortcode }}" class="mr-2">
+                                    <img src="{{ url_for('media', group_name=group_name, filename='CustomEmoji-' + reaction.emoji.custom_emoji.shortcode[1:-1] + '.' + reaction.emoji.custom_emoji.content_type.split('/')[-1]) }}" alt="{{ reaction.emoji.custom_emoji.shortcode }}" class="mr-2">
                                 {% endif %}
                             {% endfor %}
                         </div>

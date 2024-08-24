@@ -129,7 +129,8 @@ def index(group_name):
     return render_template('index.html',
                            group_info=group_info,
                            messages=messages,
-                           member_colors=member_colors)
+                           member_colors=member_colors,
+                           group_name=group_name)
 
 
 @app.route('/')
