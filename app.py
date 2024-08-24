@@ -147,6 +147,7 @@ def home():
             if os.path.exists(group_msg_path):
                 with open(group_msg_path, 'r', encoding='utf-8') as f:
                     last_msg_date_str = json.load(f)['messages'][-1]['created_date']
+                    # TODO: support multiple locales
                     locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
                     last_msg_datetime = datetime.datetime.strptime(last_msg_date_str, "%A, %d de %B de %Y, %H:%M:%S %Z")
             if os.path.exists(group_info_path):
