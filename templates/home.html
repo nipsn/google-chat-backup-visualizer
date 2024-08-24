@@ -162,7 +162,10 @@
                     <div class="card-body">
                         <div class="group-emoji">{{ group.emoji_id }}</div>
                         <div class="group-name">{{ group.name }}</div>
-                        <p class="group-description">Join the conversation in {{ group.name }} and connect with other members.</p>
+                        <p class="group-description">Join the conversation in {{ group.name }} and connect with other members.
+                            <br>
+                            <em>Last message: {{ group.last_msg_date_str }}</em>
+                        </p>
                         <a href="{{ url_for('index', group_name=group.group_name) }}" class="btn-visit-group btn">Visit Group</a>
                     </div>
                 </div>

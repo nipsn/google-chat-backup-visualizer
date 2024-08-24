@@ -157,7 +157,8 @@ def home():
                         'name': group_info['name'],
                         'emoji_id': group_info.get('emoji_id', '📁'),
                         'group_name': group_name,
-                        'last_msg_datetime': last_msg_datetime
+                        'last_msg_datetime': last_msg_datetime,
+                        'last_msg_date_str': last_msg_date_str,
                     })
     groups.sort(key=lambda x: x['last_msg_datetime'], reverse=True)
     return render_template('home.html', groups=groups)
