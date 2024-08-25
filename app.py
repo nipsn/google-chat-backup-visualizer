@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 
 def assign_colors(members):
-    colors = ['#33FF57', '#FF5733', '#3357FF', '#FF33A1', '#A133FF', '#33FFF5']
+    colors = ['#FF595E', '#FF924C', '#FFCA3A', '#8AC926', '#52A675', '#1982C4', '#4267AC', '#6A4C93']
     member_colors = {}
     color_index = 0
     for member in members:
@@ -40,12 +40,12 @@ def replace_image_references(msg_list, search_term):
 
 
 def replace_html_special_chars(text):
+    text = text.replace("&", "&amp;")
+    text = text.replace("\u0026", "&amp;")
     text = text.replace("<", "&lt;")
     text = text.replace("\u003c", "&lt;")
     text = text.replace(">", "&gt;")
-    text = text.replace("\u003e", "&gt;")
-    text = text.replace("&", "&amp;")
-    return text.replace("\u0026", "&amp;")
+    return text.replace("\u003e", "&gt;")
 
 
 def load_json_data(group_path):
@@ -88,8 +88,11 @@ def replace_emoji(text, annotations):
     url_pattern = re.compile(r'(https?://\S+)')
     text = url_pattern.sub(r'<a href="\1">\1</a>', text)
 
-    code_pattern = re.compile(r'```([^`]+)```', re.DOTALL)
+    code_pattern = re.compile(r'```\s+([^`]+)\s+```', re.DOTALL)
     text = code_pattern.sub(r'<pre><code>\1</code></pre>', text)
+
+    inline_code_pattern = re.compile(r'`\s+([^`]+)\s+`', re.DOTALL)
+    text = inline_code_pattern.sub(r'<code>\1</code>', text)
 
     mention_pattern = re.compile(
         r'@((?:[\wáéíóúÁÉÍÓÚñÑ]+\s+){0,2}[\wáéíóúÁÉÍÓÚñÑ]+)')

@@ -53,10 +53,12 @@
         <h2 class="text-secondary mb-4">Group Messages</h2>
         <ul class="list-group" id="messageList">
             {% for message in messages.messages %}
-                <li class="list-group-item message" style="border-color: {{ member_colors[message.creator.name] }};">
+                <li class="list-group-item message">
                     <strong class="member" style="color: {{ member_colors[message.creator.name] }}">{{ message.creator.name }}:</strong> 
                     {% if message.annotations %}
-                        {{ message.text|replace_emoji(message.annotations) }}
+                        <div style="overflow-wrap: break-word">
+                            {{ message.text|replace_emoji(message.annotations) }}
+                        </div>
                         {% for annotation in message.annotations %}
                             {% if annotation.url_metadata and annotation.url_metadata.title %}
                                 <a href="{{ annotation.url_metadata.url.private_do_not_access_or_else_safe_url_wrapped_value }}" class="annotation-box d-block mt-2">
