@@ -1,0 +1,331 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Generated schema for Root",
+  "type": "object",
+  "properties": {
+    "messages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "creator": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "user_type": {
+                "type": "string"
+              },
+              "acting_user": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "user_id": {
+                    "type": "string"
+                  },
+                  "user_type": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "user_id",
+                  "user_type"
+                ]
+              }
+            },
+            "required": [
+              "name",
+              "email",
+              "user_type"
+            ]
+          },
+          "created_date": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "topic_id": {
+            "type": "string"
+          },
+          "message_id": {
+            "type": "string"
+          },
+          "attached_files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "original_name": {
+                  "type": "string"
+                },
+                "export_name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "original_name",
+                "export_name"
+              ]
+            }
+          },
+          "annotations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "start_index": {
+                  "type": "number"
+                },
+                "length": {
+                  "type": "number"
+                },
+                "format_metadata": {
+                  "type": "object",
+                  "properties": {
+                    "format_type": {
+                      "type": "string"
+                    },
+                    "font_color": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "format_type"
+                  ]
+                },
+                "video_call_metadata": {
+                  "type": "object",
+                  "properties": {
+                    "meeting_space": {
+                      "type": "object",
+                      "properties": {
+                        "meeting_url": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "meeting_url"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "meeting_space"
+                  ]
+                },
+                "gsuite_integration_metadata": {
+                  "type": "object",
+                  "properties": {
+                    "call_data": {
+                      "type": "object",
+                      "properties": {
+                        "call_status": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "call_status"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "call_data"
+                  ]
+                },
+                "url_metadata": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string"
+                    },
+                    "snippet": {
+                      "type": "string"
+                    },
+                    "image_url": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "object",
+                      "properties": {
+                        "private_do_not_access_or_else_safe_url_wrapped_value": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "private_do_not_access_or_else_safe_url_wrapped_value"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "title",
+                    "snippet",
+                    "image_url",
+                    "url"
+                  ]
+                }
+              },
+              "required": [
+                "start_index",
+                "length"
+              ]
+            }
+          },
+          "reactions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "emoji": {
+                  "type": "object",
+                  "properties": {
+                    "unicode": {
+                      "type": "string"
+                    },
+                    "custom_emoji": {
+                      "type": "object",
+                      "properties": {
+                        "shortcode": {
+                          "type": "string"
+                        },
+                        "state": {
+                          "type": "string"
+                        },
+                        "creator_user_id": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "email": {
+                              "type": "string"
+                            },
+                            "user_type": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "name",
+                            "email",
+                            "user_type"
+                          ]
+                        },
+                        "owner_customer_id": {
+                          "type": "string"
+                        },
+                        "create_time": {
+                          "type": "string"
+                        },
+                        "content_type": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "shortcode",
+                        "state",
+                        "creator_user_id",
+                        "owner_customer_id",
+                        "create_time",
+                        "content_type"
+                      ]
+                    }
+                  },
+                  "required": []
+                },
+                "reactor_emails": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "emoji",
+                "reactor_emails"
+              ]
+            }
+          },
+          "quoted_message_metadata": {
+            "type": "object",
+            "properties": {
+              "creator": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "user_type": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "email",
+                  "user_type"
+                ]
+              },
+              "text": {
+                "type": "string"
+              },
+              "annotations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "start_index": {
+                      "type": "number"
+                    },
+                    "length": {
+                      "type": "number"
+                    },
+                    "format_metadata": {
+                      "type": "object",
+                      "properties": {
+                        "format_type": {
+                          "type": "string"
+                        },
+                        "font_color": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "format_type"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "start_index",
+                    "length",
+                    "format_metadata"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "creator",
+              "text"
+            ]
+          }
+        },
+        "required": [
+          "creator",
+          "created_date",
+          "topic_id",
+          "message_id"
+        ]
+      }
+    }
+  },
+  "required": [
+    "messages"
+  ]
+}
