@@ -2,6 +2,18 @@
 
 This project aims to provide a way to easily visualize a Google Chat backup.
 
+## Features
+
+- Visualize Google Chat backups via a local web app
+- Search messages across chats
+- Pinned messages and pinned chats views
+- Dark mode interface
+- Assigns messages from deleted users to a placeholder identity
+- Works directly from the exported JSON files in `resources`
+- Optional SQLite import for faster querying and file indexing
+- Docker support with a mounted `resources` directory
+- Configurable resources path via `GCBV_RESOURCES_DIR`
+
 To get started:
 
  - Get your backup
