@@ -6,6 +6,17 @@ from pathlib import Path
 
 
 def ensure_schema(conn: sqlite3.Connection) -> None:
+    existing = conn.execute(
+        "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'messages'"
+    ).fetchone()
+    if existing:
+        columns = {row[1] for row in conn.execute("PRAGMA table_info(messages)").fetchall()}
+        if "message_index" not in columns:
+            raise RuntimeError(
+                "Existing database is missing messages.message_index. "
+                "Delete the database and re-import to create the new schema."
+            )
+
     conn.executescript(
         """
         PRAGMA foreign_keys = ON;
@@ -45,6 +56,7 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
             created_date TEXT,
             text TEXT,
             creator_user_id INTEGER,
+            message_index INTEGER NOT NULL,
             raw_json TEXT,
             UNIQUE(conversation_id, message_id),
             FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,
@@ -122,8 +134,19 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
             FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE
         );
 
+        CREATE TABLE IF NOT EXISTS pinned_messages (
+            id INTEGER PRIMARY KEY,
+            conversation_id INTEGER NOT NULL,
+            message_id TEXT NOT NULL,
+            pinned_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(conversation_id, message_id),
+            FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
+        );
+
         CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages(conversation_id);
         CREATE INDEX IF NOT EXISTS idx_messages_created_date ON messages(created_date);
+        CREATE INDEX IF NOT EXISTS idx_messages_conversation_index ON messages(conversation_id, message_index);
+        CREATE INDEX IF NOT EXISTS idx_pinned_messages_conversation ON pinned_messages(conversation_id);
         """
     )
 
@@ -205,13 +228,13 @@ def import_messages(
         ["File-image.png", "File-imagen.png", "File-unnamed.png"],
     )
 
-    for msg in messages:
+    for index, msg in enumerate(messages):
         creator_id = get_or_create_user(conn, msg.get("creator"))
         conn.execute(
             """
             INSERT OR IGNORE INTO messages
-            (conversation_id, message_id, topic_id, created_date, text, creator_user_id, raw_json)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            (conversation_id, message_id, topic_id, created_date, text, creator_user_id, message_index, raw_json)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 conversation_id,
@@ -220,6 +243,7 @@ def import_messages(
                 msg.get("created_date"),
                 msg.get("text"),
                 creator_id,
+                index,
                 json.dumps(msg, ensure_ascii=False),
             ),
         )
@@ -437,10 +461,18 @@ def main() -> None:
         default="resources/chat.db",
         help="SQLite database path to create or update.",
     )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Delete existing database before import.",
+    )
     args = parser.parse_args()
 
     root_dir = Path(args.root)
     db_path = Path(args.db)
+
+    if args.force and db_path.exists():
+        db_path.unlink()
 
     import_conversations(root_dir, db_path)
     print(f"Imported conversations into {db_path}")

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Chat Archive</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet">
+</head>
+<body class="has-chat-drawer">
+    <div class="bg-orb orb-1" aria-hidden="true"></div>
+    <div class="bg-orb orb-2" aria-hidden="true"></div>
+    <div class="bg-orb orb-3" aria-hidden="true"></div>
+    <header class="header">
+        <div class="group-meta">
+            <span class="group-emoji" aria-label="Archive">💾</span>
+            <div class="group-text">
+                <h1>Google Chat Archive</h1>
+                <p class="group-subtitle">Browse spaces and direct messages</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button id="toggleChatMenu" class="toggle-sidebar-btn" aria-label="Toggle Chat Menu">
+                <i class="fas fa-comments"></i>
+            </button>
+            <button id="toggleDarkMode" class="toggle-dark-mode-btn" aria-label="Toggle Dark Mode">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </header>
+    <aside class="chat-drawer is-open" aria-label="Chats">
+        <div class="drawer-header">
+            <div>
+                <h2>Chats</h2>
+                <p>{{ spaces|length }} spaces · {{ dms|length }} DMs</p>
+            </div>
+            <button id="hideChatMenu" class="hide-sidebar-btn" aria-label="Hide Chat Menu">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+        </div>
+        <div class="drawer-search">
+            <i class="fas fa-search"></i>
+            <input type="text" id="chatSearchInput" class="form-control" placeholder="Search chats or people...">
+        </div>
+        <div class="drawer-section">
+            <button class="drawer-section-toggle" type="button" data-target="pinnedChatsList" aria-expanded="true">
+                Pinned
+                <span class="drawer-section-count">{{ pinned_chats|length }}</span>
+                <i class="fas fa-chevron-up"></i>
+            </button>
+            <ul class="chat-list" id="pinnedChatsList">
+                {% if pinned_chats %}
+                    {% for conv in pinned_chats %}
+                        <li data-conversation-id="{{ conv.id }}">
+                            <div class="chat-item-row">
+                                <a href="{{ url_for('chat', page_name=conv.dir_name) }}"
+                                   class="chat-item"
+                                   data-conversation-id="{{ conv.id }}"
+                                   data-search="{{ (conv.display_name ~ ' ' ~ (' '.join(conv.members)))|lower }}">
+                                    <span class="chat-icon {% if conv.emoji_id %}chat-icon--emoji{% else %}chat-icon--initials{% endif %}">
+                                        {{ conv.icon_text }}
+                                    </span>
+                                    <span class="chat-item-text">
+                                        <span class="chat-name">{{ conv.display_name }}</span>
+                                        <span class="chat-meta">
+                                            {% if conv.conv_type == "dm" %}DM{% else %}Space{% endif %}
+                                            · {{ conv.members|length }} members
+                                        </span>
+                                    </span>
+                                </a>
+                                <button class="pin-chat-btn unpin-chat-btn is-pinned" aria-label="Unpin chat" data-conversation-id="{{ conv.id }}">
+                                    <i class="fas fa-thumbtack"></i>
+                                </button>
+                            </div>
+                        </li>
+                    {% endfor %}
+                {% else %}
+                    <li class="chat-list-empty" data-empty-state="pinned">No pinned chats yet</li>
+                {% endif %}
+            </ul>
+        </div>
+        <div class="drawer-section">
+            <button class="drawer-section-toggle" type="button" data-target="spacesList" aria-expanded="true">
+                Spaces
+                <span class="drawer-section-count">{{ spaces|length }}</span>
+                <i class="fas fa-chevron-up"></i>
+            </button>
+            <ul class="chat-list" id="spacesList">
+                {% for conv in spaces %}
+                    <li data-conversation-id="{{ conv.id }}">
+                        <div class="chat-item-row">
+                            <a href="{{ url_for('chat', page_name=conv.dir_name) }}"
+                               class="chat-item"
+                               data-conversation-id="{{ conv.id }}"
+                               data-search="{{ (conv.display_name ~ ' ' ~ (' '.join(conv.members)))|lower }}">
+                                <span class="chat-icon {% if conv.emoji_id %}chat-icon--emoji{% else %}chat-icon--initials{% endif %}">
+                                    {{ conv.icon_text }}
+                                </span>
+                                <span class="chat-item-text">
+                                    <span class="chat-name">{{ conv.display_name }}</span>
+                                    <span class="chat-meta">Space · {{ conv.members|length }} members</span>
+                                </span>
+                            </a>
+                            <button class="pin-chat-btn {% if conv.id in pinned_chat_ids %}is-pinned{% endif %}"
+                                    aria-label="{% if conv.id in pinned_chat_ids %}Unpin chat{% else %}Pin chat{% endif %}"
+                                    data-conversation-id="{{ conv.id }}">
+                                <i class="fas fa-thumbtack"></i>
+                            </button>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="drawer-section">
+            <button class="drawer-section-toggle" type="button" data-target="dmsList" aria-expanded="true">
+                Direct Messages
+                <span class="drawer-section-count">{{ dms|length }}</span>
+                <i class="fas fa-chevron-up"></i>
+            </button>
+            <ul class="chat-list" id="dmsList">
+                {% for conv in dms %}
+                    <li data-conversation-id="{{ conv.id }}">
+                        <div class="chat-item-row">
+                            <a href="{{ url_for('chat', page_name=conv.dir_name) }}"
+                               class="chat-item"
+                               data-conversation-id="{{ conv.id }}"
+                               data-search="{{ (conv.display_name ~ ' ' ~ (' '.join(conv.members)))|lower }}">
+                                <span class="chat-icon {% if conv.emoji_id %}chat-icon--emoji{% else %}chat-icon--initials{% endif %}">
+                                    {{ conv.icon_text }}
+                                </span>
+                                <span class="chat-item-text">
+                                    <span class="chat-name">{{ conv.display_name }}</span>
+                                    <span class="chat-meta">DM · {{ conv.members|length }} members</span>
+                                </span>
+                            </a>
+                            <button class="pin-chat-btn {% if conv.id in pinned_chat_ids %}is-pinned{% endif %}"
+                                    aria-label="{% if conv.id in pinned_chat_ids %}Unpin chat{% else %}Pin chat{% endif %}"
+                                    data-conversation-id="{{ conv.id }}">
+                                <i class="fas fa-thumbtack"></i>
+                            </button>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </aside>
+    <main class="main-content main-content--wide">
+        <section class="landing-hero">
+            <div>
+                <h2>Pick up any conversation</h2>
+                <p>Search across spaces and direct messages, then jump into the message timeline.</p>
+            </div>
+            <div class="landing-stats">
+                <div class="stat-card">
+                    <span class="stat-label">Spaces</span>
+                    <span class="stat-value">{{ spaces|length }}</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Direct Messages</span>
+                    <span class="stat-value">{{ dms|length }}</span>
+                </div>
+            </div>
+        </section>
+        {% if not has_data %}
+            <section class="landing-section">
+                <div class="landing-empty">
+                    <h2>No conversations loaded yet</h2>
+                    <p>Import your Google Chat export into SQLite, then reload this page.</p>
+                </div>
+            </section>
+        {% endif %}
+        <section class="landing-section">
+            <h2 class="section-title">Spaces</h2>
+            <div class="landing-grid">
+                {% for conv in spaces %}
+                    <a class="landing-card" href="{{ url_for('chat', page_name=conv.dir_name) }}">
+                        <span class="chat-icon {% if conv.emoji_id %}chat-icon--emoji{% else %}chat-icon--initials{% endif %}">
+                            {{ conv.icon_text }}
+                        </span>
+                        <div>
+                            <h3>{{ conv.display_name }}</h3>
+                            <p>{{ conv.members|length }} members</p>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        </section>
+        <section class="landing-section">
+            <h2 class="section-title">Direct Messages</h2>
+            <div class="landing-grid">
+                {% for conv in dms %}
+                    <a class="landing-card" href="{{ url_for('chat', page_name=conv.dir_name) }}">
+                        <span class="chat-icon {% if conv.emoji_id %}chat-icon--emoji{% else %}chat-icon--initials{% endif %}">
+                            {{ conv.icon_text }}
+                        </span>
+                        <div>
+                            <h3>{{ conv.display_name }}</h3>
+                            <p>{{ conv.members|length }} members</p>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+</body>
+</html>

@@ -4,17 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Group Info and Messages</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
     <link href="static/styles.css" rel="stylesheet">
 </head>
 <body>
+    <div class="bg-orb orb-1" aria-hidden="true"></div>
+    <div class="bg-orb orb-2" aria-hidden="true"></div>
+    <div class="bg-orb orb-3" aria-hidden="true"></div>
     <header class="header">
-        <div style="display: flex; align-items: center;">
+        <div class="group-meta">
             <span class="group-emoji" aria-label="Group Emoji">{{ group_info.emoji_id }}</span>
-            <h1>{{ group_info.name }}</h1>
+            <div class="group-text">
+                <h1>{{ group_info.name }}</h1>
+                <p class="group-subtitle">Google Chat archive</p>
+            </div>
         </div>
-        <div>
+        <div class="header-actions">
             <button id="toggleDarkMode" class="toggle-dark-mode-btn" aria-label="Toggle Dark Mode">
                 <i class="fas fa-moon"></i>
             </button>
@@ -30,50 +39,66 @@
         <button id="hideSidebar" class="hide-sidebar-btn" aria-label="Hide Sidebar">
             <i class="fas fa-arrow-right"></i>
         </button>
-        <h2 class="text-secondary mb-4 text-center">Members</h2>
-        <ul class="list-group">
+        <h2 class="sidebar-title">Members</h2>
+        <ul class="list-group member-list">
             {% for member in group_info.members %}
                 <li class="list-group-item" style="color: {{ member_colors[member.name] }}">{{ member.name }} ({{ member.email }})</li>
             {% endfor %}
         </ul>
-        <h2 class="text-secondary mb-4 text-center">Pinned Messages</h2>
+        <h2 class="sidebar-title">Pinned Messages</h2>
         <ul class="list-group" id="pinnedMessagesList">
             {% for pinned in pinned_messages %}
-                <li class="list-group-item">
-                    <strong>{{ pinned.creator.name }}:</strong> {{ pinned.text }}
-                    <br><em>{{ pinned.created_date }}</em>
+                <li class="list-group-item pinned-message-item" data-message-id="{{ pinned.message_id }}">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <strong>{{ pinned.creator.name }}:</strong> {{ pinned.text }}
+                            <br><em>{{ pinned.created_date }}</em>
+                        </div>
+                        <button class="pin-message-btn unpin-message-btn" aria-label="Unpin Message">
+                            <i class="fas fa-thumbtack"></i>
+                        </button>
+                    </div>
                 </li>
             {% endfor %}
         </ul>
     </div>
-    <div class="main-content">
+    <main class="main-content">
         <div class="search-bar">
-            <input type="text" id="searchInput" class="form-control" placeholder="Search messages...">
+            <div class="search-field">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" class="form-control" placeholder="Search messages...">
+            </div>
         </div>
-        <h2 class="text-secondary mb-4">Group Messages</h2>
-        <ul class="list-group" id="messageList">
+        <h2 class="section-title">Group Messages</h2>
+        <ul class="list-group message-list" id="messageList">
             {% for message in messages.messages %}
-                <li class="list-group-item message" style="border-color: {{ member_colors[message.creator.name] }};">
-                    <strong class="member" style="color: {{ member_colors[message.creator.name] }}">{{ message.creator.name }}:</strong> 
-                    {% if message.annotations %}
-                        {{ message.text|replace_emoji(message.annotations) }}
-                        {% for annotation in message.annotations %}
-                            {% if annotation.url_metadata and annotation.url_metadata.title %}
-                                <a href="{{ annotation.url_metadata.url.private_do_not_access_or_else_safe_url_wrapped_value }}" class="annotation-box d-block mt-2">
-                                    <img src="{{ annotation.url_metadata.image_url }}" alt="Image" class="img-fluid">
-                                    <p class="mt-2">{{ annotation.url_metadata.title }}</p>
-                                    <p>{{ annotation.url_metadata.snippet }}</p>
-                                </a>
-                            {% elif annotation.url_metadata and annotation.url_metadata.image_url %}
-                                <br>
-                                <img src="{{ annotation.url_metadata.image_url }}" alt="GIF" class="img-fluid mt-2">
+                <li class="list-group-item message" data-message-id="{{ message.message_id }}" style="border-color: {{ member_colors[message.creator.name] }};">
+                    <div class="message-header">
+                        <strong class="member" style="color: {{ member_colors[message.creator.name] }}">{{ message.creator.name }}</strong>
+                        <span class="timestamp">{{ message.created_date }}</span>
+                    </div>
+                    <div class="message-body">
+                        <div class="message-text">
+                            {% if message.annotations %}
+                                {{ message.text|replace_emoji(message.annotations) }}
+                            {% else %}
+                                {{ message.text|replace_emoji([]) }}
                             {% endif %}
-                        {% endfor %}
-                    {% else %}
-                        {{ message.text|replace_emoji([]) }}
-                    {% endif %}
-                    <br>
-                    <em>{{ message.created_date }}</em><br>
+                        </div>
+                        {% if message.annotations %}
+                            {% for annotation in message.annotations %}
+                                {% if annotation.url_metadata and annotation.url_metadata.title %}
+                                    <a href="{{ annotation.url_metadata.url.private_do_not_access_or_else_safe_url_wrapped_value }}" class="annotation-box d-block mt-2">
+                                        <img src="{{ annotation.url_metadata.image_url }}" alt="Image" class="img-fluid">
+                                        <p class="mt-2">{{ annotation.url_metadata.title }}</p>
+                                        <p>{{ annotation.url_metadata.snippet }}</p>
+                                    </a>
+                                {% elif annotation.url_metadata and annotation.url_metadata.image_url %}
+                                    <img src="{{ annotation.url_metadata.image_url }}" alt="GIF" class="img-fluid mt-2">
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </div>
                     {% if message.attached_files %}
                         <div class="attachments mt-2">
                             <strong>Attachments:</strong>
@@ -110,10 +135,19 @@
                 </li>
             {% endfor %}
         </ul>
-    </div>
+    </main>
     <button id="scrollToBottom" class="scroll-to-bottom-btn" aria-label="Scroll to Bottom">
         <i class="fas fa-arrow-down"></i>
     </button>
+    <div id="imageLightbox" class="image-lightbox" aria-hidden="true">
+        <div class="image-lightbox-backdrop"></div>
+        <div class="image-lightbox-content" role="dialog" aria-modal="true" aria-label="Image preview">
+            <button class="image-lightbox-close" aria-label="Close image">
+                <i class="fas fa-times"></i>
+            </button>
+            <img id="lightboxImage" alt="Expanded view">
+        </div>
+    </div>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

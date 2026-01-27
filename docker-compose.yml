@@ -1,0 +1,18 @@
+services:
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      # SQLite database inside the mounted resources directory.
+      # Example: /app/resources/chat.db
+      GCBV_DB_PATH: /app/resources/chat.db
+      # Root of the Google Chat export inside the mounted resources directory.
+      # Example: /app/resources/Google Chat
+      GCBV_ROOT_PATH: /app/resources/Google Chat
+    volumes:
+      # Map any host directory to /app/resources.
+      # Examples:
+      #   GCBV_RESOURCES_DIR=./resources
+      #   GCBV_RESOURCES_DIR=/absolute/path/to/resources
+      - ${GCBV_RESOURCES_DIR:-./resources}:/app/resources:rw

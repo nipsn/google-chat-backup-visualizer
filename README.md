@@ -19,3 +19,21 @@ Now you can launch the app with:
 pip install -r requirements.txt
 python3 app.py
 ```
+
+## Docker
+
+The container mounts a host directory at `/app/resources`.
+
+By default it uses `./resources` from the repo:
+
+```sh
+docker compose up --build
+```
+
+Or point it at any directory containing your Google Chat export:
+
+```sh
+GCBV_RESOURCES_DIR=/path/to/resources docker compose up --build
+```
+
+Then open `http://localhost:5000`.
